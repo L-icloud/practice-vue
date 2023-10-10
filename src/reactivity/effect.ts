@@ -1,5 +1,8 @@
 import { extend } from "../shared";
 
+
+let activeEffect;
+let shouldTrack;
 class ReactiveEffect {
   private _fn: any;
   deps = [];
@@ -13,6 +16,9 @@ class ReactiveEffect {
 
   run() {
     activeEffect = this;
+    // 1. 会收集依赖
+    //    shouldTack 来做区分
+
     return this._fn();
   }
 
@@ -51,6 +57,8 @@ export function track(target, key) {
   }
 
   if(!activeEffect) return
+  if(!shouldTrack) return
+
   dep.add(activeEffect);
   activeEffect.deps.push(dep);
   // const dep = new Set()
@@ -69,7 +77,6 @@ export function trigger(target, key) {
   }
 }
 
-let activeEffect;
 export function effect(fn, options: any = {}) {
   // fn
   const _effect = new ReactiveEffect(fn, options.scheduler);
